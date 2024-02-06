@@ -1,91 +1,123 @@
 #!/usr/bin/python3
-'''N Queens Challenge'''
+'''
+N Queen Puzzle
+    Description:
+        The N queens puzzle is the challenge of
+        placing N non-attacking queens on an N×N chessboard.
+
+    Usage:
+        If the user called the program with the wrong
+        number of arguments, print Usage:
+        nqueens N, followed by a new line, and exit with the status 1
+        where N must be an integer greater or equal to 4
+        If N is not an integer, print N must be a number,
+        followed by a new line,
+        and exit with the status 1
+        If N is smaller than 4, print N must be at least 4,
+        followed by a new line,
+        and exit with the status 1
+        The program should print every possible solution to the problem
+        One solution per line
+        Format: see example
+        You don’t have to print the solutions in a specific order
+
+'''
+
 
 import sys
 
 
-if __name__ == '__main__':
-    if len(sys.argv) != 2:
+if __name__ == "__main__":
+
+    '''
+    If the user called the program with the
+    wrong number of arguments, print Usage:
+    nqueens N, followed by a new line, and exit with the status 1
+    where N must be an integer greater or equal to 4
+    If N is not an integer, print N must be a number, followed by a new line,
+    and exit with the status 1
+    If N is smaller than 4, print N must be at least 4, followed by a new line,
+    and exit with the status 1
+
+    '''
+    if not len(sys.argv) == 2:
         print("Usage: nqueens N")
         sys.exit(1)
 
-    try:
-        n = int(sys.argv[1])
-    except ValueError:
-        print('N must be a number')
-        exit(1)
+    if not (sys.argv[1]).isdigit():
+        print("N must be a number")
+        sys.exit(1)
 
-    if n < 4:
-        print('N must be at least 4')
-        exit(1)
+    N = int(sys.argv[1])
+    if N < 4:
+        print("N must be at least 4")
+        sys.exit(1)
 
-    solutions = []
-    placed_queens = []  # coordinates format [row, column]
-    stop = False
-    r = 0
-    c = 0
 
-    # iterate thru rows
-    while r < n:
-        goback = False
-        # iterate thru columns
-        while c < n:
-            # check is current column is safe
-            safe = True
-            for cord in placed_queens:
-                col = cord[1]
-                if(col == c or col + (r-cord[0]) == c or
-                        col - (r-cord[0]) == c):
-                    safe = False
-                    break
+def BoadOk(board, row, column, N):
 
-            if not safe:
-                if c == n - 1:
-                    goback = True
-                    break
-                c += 1
-                continue
+    '''
+    Checks if a queen can be placed on the board
+    Returns:
+        True if queen could be placed
+        False if there is not a save place
+    '''
 
-            # place queen
-            cords = [r, c]
-            placed_queens.append(cords)
-            # if last row, append solution and reset all to last unfinished row
-            # and last safe column in that row
-            if r == n - 1:
-                solutions.append(placed_queens[:])
-                for cord in placed_queens:
-                    if cord[1] < n - 1:
-                        r = cord[0]
-                        c = cord[1]
-                for i in range(n - r):
-                    placed_queens.pop()
-                if r == n - 1 and c == n - 1:
-                    placed_queens = []
-                    stop = True
-                r -= 1
-                c += 1
-            else:
-                c = 0
-            break
-        if stop:
-            break
-        # on fail: go back to previous row
-        # and continue from last safe column + 1
-        if goback:
-            r -= 1
-            while r >= 0:
-                c = placed_queens[r][1] + 1
-                del placed_queens[r]  # delete previous queen coordinates
-                if c < n:
-                    break
-                r -= 1
-            if r < 0:
-                break
-            continue
-        r += 1
+    for i in range(column):
+        if board[row][i] == 1:
+            return False
 
-    for idx, val in enumerate(solutions):
-        if idx == len(solutions) - 1:
-            print(val, end='')
-        else:
-            print(val)
+    for i, j in zip(range(row, -1, -1),
+                    range(column, -1, -1)):
+        if board[i][j] == 1:
+            return False
+
+    for i, j in zip(range(row, N, 1),
+                    range(column, -1, -1)):
+        if board[i][j] == 1:
+            return False
+
+    return True
+
+
+def SolutionNQ(board, column, N):
+
+    '''
+    solves the n queen problem using Backtracking
+    by finding the posibles board to placed all the n queens on it
+    in a save places
+    Returns:
+        True if all the queens are placed on the board
+        False if a queen can not be placed
+    '''
+
+    if column == N:
+        Board(board)
+        return True
+
+    f = False
+    for i in range(N):
+        if BoadOk(board, i, column, N):
+            board[i][column] = 1
+            f = SolutionNQ(board, column + 1, N) or f
+            board[i][column] = 0
+    return f
+
+
+def Board(board):
+
+    '''
+    prints the row and column where the queens are
+    positioned. "Our Board"
+    '''
+
+    solve = []
+    for i in range(len(board)):
+        for j in range(len(board)):
+            if board[i][j] == 1:
+                solve.append([i, j])
+    print(solve)
+
+
+board = [[0 for i in range(N)] for j in range(N)]
+SolutionNQ(board, 0, N)
